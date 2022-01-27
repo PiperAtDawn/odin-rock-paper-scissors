@@ -1,9 +1,53 @@
 const choices = ["Rock", "Paper", "Scissors"];
+let score = [0, 0]; // Player, Computer
+let round = 1;
+
+const roundNumber = document.querySelector("#round");
+const scoreText = document.querySelector("#score");
+const roundResults = document.querySelector("#round-results");
+const playButtons = document.querySelectorAll(".play-button");
+const letsPlay = document.querySelector("#letsPlay");
+const resetButton = document.querySelector("#reset-button");
+
+const finish = () => {
+    playButtons.forEach(button => {
+        button.disabled = true;
+    });
+    if (score[0] > score[1]) {
+        letsPlay.textContent = "Congradulations! You won!";
+    }
+    else letsPlay.textContent = "The computer won! Better luck next time!";
+    resetButton.textContent = "Play again";
+}
+
+const reset = () => {
+    resetButton.textContent = "Reset";
+    round = 1;
+    score = [0, 0];
+    letsPlay.textContent = "Let's play!";
+    roundNumber.textContent = "Round 1";
+    playButtons.forEach(button => {
+        button.disabled = false;
+    });
+    roundResults.textContent = "None";
+    scoreText.textContent = "None";
+}
+
+resetButton.addEventListener ("click", reset);
+
+const updateScore = (winner) => {
+    score[winner]++;
+    scoreText.textContent = `Player: ${score[0]}, Computer: ${score[1]}`;
+    round++;
+    if (score[0] === 5 || score[1] === 5) roundNumber.textContent = "Game over!";
+    else roundNumber.textContent = `Round ${round}`;
+}
 
 const computerPlay = () => {
     return (choices[Math.floor(Math.random() * 3)]);
 }
 
+// Returns 0 if it's a tie, 1 if player won, 2 if computer won
 const compareChoices = (choice1, choice2) => {
     const index1 = choices.indexOf(choice1);
     const index2 = choices.indexOf(choice2);
@@ -14,54 +58,27 @@ const compareChoices = (choice1, choice2) => {
     }
 }
 
-const chooseWinner = (playerSelection, computerSelection) => {
+const playRound = (playerSelection) => {
+    const computerSelection = computerPlay();
     const winner = compareChoices(playerSelection, computerSelection);
     switch (winner) {
         case 0:
-            console.log(`Tie! You both selected ${playerSelection}!`);
+            roundResults.textContent = "Tie! Try again!";
             break;
         case 1:
-            console.log(`Player wins! ${playerSelection} beats ${computerSelection}!`)
+            roundResults.textContent = `Player won! ${playerSelection} beats ${computerSelection}!`;
+            updateScore(0);
             break;
         case 2:
-            console.log(`Computer wins! ${computerSelection} beats ${playerSelection}!`)
+            roundResults.textContent = `Computer won! ${computerSelection} beats ${playerSelection}!`;
+            updateScore(1);
             break;
         default:
-            console.log("Sorry, something went wrong!");
+            break;
     }
-    return winner;
+    if (score[0] === 5 || score[1] === 5) finish();
 }
 
-const playRound = () => {
-    let playerSelection = "";
-    
-    while (!choices.includes(playerSelection)) {
-        playerSelection = prompt("Please choose Rock, Paper or Scissors!");
-        playerSelection.toLowerCase();
-        playerSelection = playerSelection[0].toUpperCase() + playerSelection.substring(1);
-        if (!choices.includes(playerSelection)) {
-            console.log("Incorrect value!");
-        }
-    }
-    const computerSelection = computerPlay();
-    return chooseWinner(playerSelection, computerSelection);
-}
-
-const game = () => {
-    let tally = [0, 0, 0];
-    for (i = 0; i < 5; i++){
-        tally[playRound()]++;
-    }
-    console.log(`Ties: ${tally[0]}. Player: ${tally[1]}. Computer: ${tally[2]}`);
-    if (tally[1]>tally[2]) {
-        console.log("Player wins!");
-    }
-    else if (tally[1]<tally[2]) {
-            console.log("Computer wins!")
-        }
-        else {
-            console.log("It's a tie!");
-        }
-}
-
-game();
+playButtons.forEach(button => {
+    button.addEventListener("click", () => playRound(button.textContent));
+});
